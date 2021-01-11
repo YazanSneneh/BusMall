@@ -1,12 +1,19 @@
+'use strict';
 var catalogArray = [];
 
 var left = document.getElementById('left-image');
 var midImage = document.getElementById('mid-image');
 var right = document.getElementById('right-image');
+
 var imagesContainer = document.getElementsByClassName('catalog-img');
 var rounds = 25;
+
 var resultButton = document.getElementById('result-btn');
 var resultContainer = document.getElementById('result-container');
+
+var chartCanvas = document.getElementById('chart-canvas').getContext('2d');
+
+var lastImagesAppeared = [];
 
 // model declrations 
 function Catalog(name, path) {
@@ -24,7 +31,7 @@ Catalog.prototype.isAppeared = function () {
     return this.imageAppearance++;
 };
 
-// add data 
+// add data using cosntructor
 new Catalog('bag', 'bag.jpg');
 new Catalog('banana', 'banana.jpg');
 new Catalog('bathroom', 'bathroom.jpg');
@@ -47,12 +54,40 @@ new Catalog('wine-glass', 'wine-glass.jpg');
 
 // functions declrations
 // generate random 3 images
+function isImageShown(index) {
+    for (var i = 0; i < lastImagesAppeared.length; i++) {
+        if (lastImagesAppeared[i].name === catalogArray[index].name) {
+            console.log('appeared last round :  ' + lastImagesAppeared[i].name)
+            return true;
+        }
+    }
+    console.log('on screen now or should be unless it loop again: ' + catalogArray[index].name)
+    return false;
+}
+/*
+var name = 'something'
+while (name === 'something'){ // condition is false
+    if not 'something' will evaluate to false
+     until name is 'something' it will be true
+     then exit
+}
+*/
+// while anumber  != 10 then keep printing it 
+// var num = 6;
+// while (num != 10) {
+//     console.log(num);
+//     num++;
+// }
 function randomImage() {
-    var randLeft = Math.floor(Math.random() * 19);
+    do {   // keep checking that item appeared
+        var randLeft = Math.floor(Math.random() * catalogArray.length);
+    } while (isImageShown(randLeft));
+
     do {
-        var randMid = Math.floor(Math.random() * 19);
-        var randRight = Math.floor(Math.random() * 19);
-    } while (randLeft === randMid || randLeft === randRight || randMid === randRight)
+        var randMid = Math.floor(Math.random() * catalogArray.length);
+        var randRight = Math.floor(Math.random() * catalogArray.length);
+    } while (randLeft === randRight || randLeft === randMid || randRight === randMid || isImageShown(randRight) || isImageShown(randMid))
+
     // count number of appearance
     catalogArray[randLeft].isAppeared()
     catalogArray[randMid].isAppeared()
@@ -67,8 +102,14 @@ function randomImage() {
 
     right.setAttribute('src', catalogArray[randRight].path);
     right.setAttribute('alt', catalogArray[randRight].name);
-}
 
+    lastImagesAppeared = [];
+    lastImagesAppeared.push(
+        catalogArray[randLeft],
+        catalogArray[randMid],
+        catalogArray[randRight]
+    )
+}
 
 function generateResults() {
     var ul = document.createElement('ul');
@@ -80,20 +121,19 @@ function generateResults() {
     }
 }
 
-// executable code
 function CheckAttempts() {  // give user attempts 
     rounds--;
-    if (rounds >= 0) {
+    if (rounds > 0) {
         for (var i = 0; i < imagesContainer.length; i++) {
             imagesContainer[i].addEventListener('click', trackClick)
         }
     } else {
         for (var i = 0; i < imagesContainer.length; i++) {
             imagesContainer[i].removeEventListener('click', trackClick)
+            addChart()
         }
     }
 }
-
 
 function trackClick() {     // method will listen to event when image clicked
     for (var i = 0; i < catalogArray.length; i++) {
@@ -104,11 +144,43 @@ function trackClick() {     // method will listen to event when image clicked
             CheckAttempts()
         }
     }
-
     randomImage();
 }
 
+function addChart() {   // represent data visually
+    var imagesName = []
+    var representAppearanceVisually = [];
+    var representCountsVisually = []
 
+    for (var i = 0; i < catalogArray.length; i++) {
+        imagesName.push(catalogArray[i].name)
+        representAppearanceVisually.push(catalogArray[i].imageAppearance)
+        representCountsVisually.push(catalogArray[i].counter)
+    }
+    new Chart(chartCanvas, {
+        // The type of chart we want to create
+        type: 'bar',
+        // The data for our dataset
+        data: {
+            labels: imagesName,  // items name in the chart
+            datasets: [{
+                label: 'Image Appearance times',    // chart title
+                backgroundColor: '#ff577f',
+                borderColor: 'rgb(255, 99, 132)',
+                data: representAppearanceVisually   // data
+            }, {
+                label: 'Image clicked times',
+                backgroundColor: '#ff884b',
+                borderColor: 'rgb(255, 99, 132)',
+                data: representCountsVisually
+            }]
+        },
+        // Configuration options go here
+        options: {}
+    });
+}
+
+// execute code
 randomImage(); // add first 3 images 
 for (var i = 0; i < imagesContainer.length; i++) {
     imagesContainer[i].addEventListener('click', trackClick)
