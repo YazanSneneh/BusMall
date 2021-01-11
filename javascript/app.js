@@ -48,10 +48,10 @@ new Catalog('wine-glass', 'wine-glass.jpg');
 // functions declrations
 // generate random 3 images
 function randomImage() {
-    var randLeft = Math.floor(Math.random() * 19);
+    var randLeft = Math.floor(Math.random() * catalogArray.length);
     do {
-        var randMid = Math.floor(Math.random() * 19);
-        var randRight = Math.floor(Math.random() * 19);
+        var randMid = Math.floor(Math.random() * catalogArray.length);
+        var randRight = Math.floor(Math.random() * catalogArray.length);
     } while (randLeft === randMid || randLeft === randRight || randMid === randRight)
     // count number of appearance
     catalogArray[randLeft].isAppeared()
@@ -68,7 +68,6 @@ function randomImage() {
     right.setAttribute('src', catalogArray[randRight].path);
     right.setAttribute('alt', catalogArray[randRight].name);
 }
-
 
 function generateResults() {
     var ul = document.createElement('ul');
