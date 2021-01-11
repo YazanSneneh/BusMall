@@ -4,7 +4,7 @@ var left = document.getElementById('left-image');
 var midImage = document.getElementById('mid-image');
 var right = document.getElementById('right-image');
 var imagesContainer = document.getElementsByClassName('catalog-img');
-var rounds = 5;
+var rounds = 25;
 var resultButton = document.getElementById('result-btn');
 var resultContainer = document.getElementById('result-container');
 
@@ -80,29 +80,37 @@ function generateResults() {
     }
 }
 
-// executable code 
-if (rounds >= 0) {
-    for (var i = 0; i < imagesContainer.length; i++) {  // loop  images and add event listener for each one
-        imagesContainer[i].addEventListener('click', function () {
-            for (var i = 0; i < catalogArray.length; i++) {
-                var imgSrc = this.getAttribute('src');
-                if (imgSrc === catalogArray[i].path) {
-                    catalogArray[i].isClicked();
-                    // console.log(catalogArray[i].name + ' : ' + catalogArray[i].counter);
-                    console.log(rounds)
-                }
-            }
-            rounds = rounds - 1;
-            randomImage();
-        })
-    }
-} else {
-    for (var i = 0; i < imagesContainer.length; i++) {
-        imagesContainer[i].removeEventListener('click')
+// executable code
+function CheckAttempts() {  // give user attempts 
+    rounds--;
+    if (rounds >= 0) {
+        for (var i = 0; i < imagesContainer.length; i++) {
+            imagesContainer[i].addEventListener('click', trackClick)
+        }
+    } else {
+        for (var i = 0; i < imagesContainer.length; i++) {
+            imagesContainer[i].removeEventListener('click', trackClick)
+        }
     }
 }
 
 
+function trackClick() {     // method will listen to event when image clicked
+    for (var i = 0; i < catalogArray.length; i++) {
+        var imgSrc = this.getAttribute('src');
+        if (imgSrc === catalogArray[i].path) {
+            catalogArray[i].isClicked();
+            console.log(rounds)
+            CheckAttempts()
+        }
+    }
 
-randomImage();
-resultButton.addEventListener('click', generateResults)
+    randomImage();
+}
+
+
+randomImage(); // add first 3 images 
+for (var i = 0; i < imagesContainer.length; i++) {
+    imagesContainer[i].addEventListener('click', trackClick)
+}
+resultButton.addEventListener('click', generateResults) // generate result in list
