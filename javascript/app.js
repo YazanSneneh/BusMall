@@ -1,6 +1,5 @@
 'use strict';
-var catalogArray = [];
-
+var catalogArray = [];  // store all images and it's information
 var left = document.getElementById('left-image');
 var midImage = document.getElementById('mid-image');
 var right = document.getElementById('right-image');
@@ -24,11 +23,14 @@ function Catalog(name, path) {
     catalogArray.push(this);
 }
 
-Catalog.prototype.isClicked = function () {
-    return this.counter++;
+function isClicked(image) {
+    image.counter++;
+    localStorage.setItem('images', JSON.stringify(catalogArray))
+    console.log(image)
+    return image.counter;
 };
-Catalog.prototype.isAppeared = function () {
-    return this.imageAppearance++;
+function isAppeared(image) {
+    return image.imageAppearance++;
 };
 
 // add data using cosntructor
@@ -57,27 +59,12 @@ new Catalog('wine-glass', 'wine-glass.jpg');
 function isImageShown(index) {
     for (var i = 0; i < lastImagesAppeared.length; i++) {
         if (lastImagesAppeared[i].name === catalogArray[index].name) {
-            console.log('appeared last round :  ' + lastImagesAppeared[i].name)
             return true;
         }
     }
-    console.log('on screen now or should be unless it loop again: ' + catalogArray[index].name)
     return false;
 }
-/*
-var name = 'something'
-while (name === 'something'){ // condition is false
-    if not 'something' will evaluate to false
-     until name is 'something' it will be true
-     then exit
-}
-*/
-// while anumber  != 10 then keep printing it 
-// var num = 6;
-// while (num != 10) {
-//     console.log(num);
-//     num++;
-// }
+
 function randomImage() {
     do {   // keep checking that item appeared
         var randLeft = Math.floor(Math.random() * catalogArray.length);
@@ -89,9 +76,9 @@ function randomImage() {
     } while (randLeft === randRight || randLeft === randMid || randRight === randMid || isImageShown(randRight) || isImageShown(randMid))
 
     // count number of appearance
-    catalogArray[randLeft].isAppeared()
-    catalogArray[randMid].isAppeared()
-    catalogArray[randRight].isAppeared()
+    isAppeared(catalogArray[randLeft])
+    isAppeared(catalogArray[randMid])
+    isAppeared(catalogArray[randRight])
 
     //  inject images into html
     left.setAttribute('src', catalogArray[randLeft].path);
@@ -112,6 +99,7 @@ function randomImage() {
 }
 
 function generateResults() {
+
     var ul = document.createElement('ul');
     resultContainer.append(ul);
     for (i = 0; i < catalogArray.length; i++) {
@@ -132,6 +120,7 @@ function CheckAttempts() {  // give user attempts
             imagesContainer[i].removeEventListener('click', trackClick)
             addChart()
         }
+        storeImages()
     }
 }
 
@@ -139,8 +128,7 @@ function trackClick() {     // method will listen to event when image clicked
     for (var i = 0; i < catalogArray.length; i++) {
         var imgSrc = this.getAttribute('src');
         if (imgSrc === catalogArray[i].path) {
-            catalogArray[i].isClicked();
-            console.log(rounds)
+            isClicked(catalogArray[i])
             CheckAttempts()
         }
     }
@@ -180,9 +168,22 @@ function addChart() {   // represent data visually
     });
 }
 
+function storeImages() {
+    localStorage.setItem('images', JSON.stringify(catalogArray));
+}
+
+function checkAndRestore() {
+    if (localStorage.length > 0) { // check if the local storage has any values in it
+        catalogArray = JSON.parse(localStorage.getItem('images')); // restore the data from the local storage
+        // generateResults()
+    }
+}
 // execute code
 randomImage(); // add first 3 images 
 for (var i = 0; i < imagesContainer.length; i++) {
     imagesContainer[i].addEventListener('click', trackClick)
 }
+
 resultButton.addEventListener('click', generateResults) // generate result in list
+
+checkAndRestore()
