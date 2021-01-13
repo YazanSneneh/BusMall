@@ -99,8 +99,10 @@ function randomImage() {
 }
 
 function generateResults() {
-
     var ul = document.createElement('ul');
+    var heading = document.createElement('h2')
+    heading.textContent = 'Result';
+    ul.append(heading)
     resultContainer.append(ul);
     for (i = 0; i < catalogArray.length; i++) {
         var li = document.createElement('li');
@@ -158,7 +160,7 @@ function addChart() {   // represent data visually
                 data: representAppearanceVisually   // data
             }, {
                 label: 'Image clicked times',
-                backgroundColor: '#ff884b',
+                backgroundColor: '#f05454',
                 borderColor: 'rgb(255, 99, 132)',
                 data: representCountsVisually
             }]
