@@ -1,115 +1,146 @@
-var catalogArray = [];
-
-var left = document.getElementById('left-image');
-var midImage = document.getElementById('mid-image');
-var right = document.getElementById('right-image');
-var imagesContainer = document.getElementsByClassName('catalog-img');
-var rounds = 25;
+'use strict';
+var leftProduct = document.getElementById('left-image');
+var midProduct = document.getElementById('mid-image');
+var rightProduct = document.getElementById('right-image');
 var resultButton = document.getElementById('result-btn');
+var container = document.getElementById('images-container')
 var resultContainer = document.getElementById('result-container');
+var barChart = document.getElementById('chart-canvas').getContext('2d');
 
-// model declrations 
-function Catalog(name, path) {
+var productArray = []; // objects list
+var rounds = 25;   // user attempts times
+
+//>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> model declrations 
+function Product(name, path) {
     this.name = name;
     this.path = 'images/' + path;
     this.counter = 0;
     this.imageAppearance = 0;
-    catalogArray.push(this);
+    productArray.push(this);
+
+}
+//  products functions
+function isClicked(product) {
+    product.counter++;
+    console.log(` ${product.name} click times : ${product.counter}`)
+    return product.counter
+};
+function timesShown(product) {
+    product.imageAppearance++;
+    // console.log(` ${product.name} appearance times : ${product.imageAppearance}`)
+    return product.imageAppearance;
+
+};
+
+// products
+new Product('bag', 'bag.jpg');
+new Product('banana', 'banana.jpg');
+new Product('bathroom', 'bathroom.jpg');
+new Product('boots', 'boots.jpg');
+new Product('breakfast', 'breakfast.jpg');
+new Product('bubblegum', 'bubblegum.jpg');
+new Product('chair', 'chair.jpg');
+new Product('cthulhu', 'cthulhu.jpg');
+new Product('dog-duck', 'dog-duck.jpg');
+new Product('dragon', 'dragon.jpg');
+new Product('pen', 'pen.jpg');
+new Product('pet-sweep', 'pet-sweep.jpg');
+new Product('scissors', 'scissors.jpg');
+new Product('shark', 'shark.jpg');
+new Product('sweep', 'sweep.png');
+new Product('unicorn', 'unicorn.jpg');
+new Product('usb', 'usb.gif');
+new Product('water-can', 'water-can.jpg');
+new Product('wine-glass', 'wine-glass.jpg');
+
+// >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> functions declrations
+function pickProducts() {
+    var left = Math.floor(Math.random() * productArray.length);
+    var mid = Math.floor(Math.random() * productArray.length);
+    var right = Math.floor(Math.random() * productArray.length);
+    displayProducts(left, mid, right)
+}
+// add images to html
+function displayProducts(left, mid, right) {
+    leftProduct.setAttribute('src', productArray[left].path);
+    timesShown(productArray[left])
+
+    midProduct.setAttribute('src', productArray[mid].path)
+    timesShown(productArray[mid])
+
+    rightProduct.setAttribute('src', productArray[right].path)
+    timesShown(productArray[right])
+}
+// >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> event functions
+function trackUserPicks(event) {
+    rounds--;    // user attempts
+    if (rounds > 0) {
+        var userChoice = event.target
+        for (var i = 0; i < productArray.length; i++) {
+            if (userChoice.getAttribute('src') === productArray[i].path) { // find image clicked, and count
+                isClicked(productArray[i])
+            }
+        }
+        pickProducts()  // display new different images
+    } else {
+        container.removeEventListener('click', trackUserPicks);
+        CreateChart()
+    }
+    console.log(rounds)
 }
 
-Catalog.prototype.isClicked = function () {
-    return this.counter++;
-};
-Catalog.prototype.isAppeared = function () {
-    return this.imageAppearance++;
-};
-
-// add data 
-new Catalog('bag', 'bag.jpg');
-new Catalog('banana', 'banana.jpg');
-new Catalog('bathroom', 'bathroom.jpg');
-new Catalog('boots', 'boots.jpg');
-new Catalog('breakfast', 'breakfast.jpg');
-new Catalog('bubblegum', 'bubblegum.jpg');
-new Catalog('chair', 'chair.jpg');
-new Catalog('cthulhu', 'cthulhu.jpg');
-new Catalog('dog-duck', 'dog-duck.jpg');
-new Catalog('dragon', 'dragon.jpg');
-new Catalog('pen', 'pen.jpg');
-new Catalog('pet-sweep', 'pet-sweep.jpg');
-new Catalog('scissors', 'scissors.jpg');
-new Catalog('shark', 'shark.jpg');
-new Catalog('sweep', 'sweep.png');
-new Catalog('unicorn', 'unicorn.jpg');
-new Catalog('usb', 'usb.gif');
-new Catalog('water-can', 'water-can.jpg');
-new Catalog('wine-glass', 'wine-glass.jpg');
-
-// functions declrations
-// generate random 3 images
-function randomImage() {
-    var randLeft = Math.floor(Math.random() * catalogArray.length);
-    do {
-        var randMid = Math.floor(Math.random() * catalogArray.length);
-        var randRight = Math.floor(Math.random() * catalogArray.length);
-    } while (randLeft === randMid || randLeft === randRight || randMid === randRight)
-    // count number of appearance
-    catalogArray[randLeft].isAppeared()
-    catalogArray[randMid].isAppeared()
-    catalogArray[randRight].isAppeared()
-
-    //  inject images into html
-    left.setAttribute('src', catalogArray[randLeft].path);
-    left.setAttribute('alt', catalogArray[randLeft].name);
-
-    midImage.setAttribute('src', catalogArray[randMid].path);
-    midImage.setAttribute('alt', catalogArray[randMid].name);
-
-    right.setAttribute('src', catalogArray[randRight].path);
-    right.setAttribute('alt', catalogArray[randRight].name);
-}
-
-function generateResults() {
+function displayResultList() {  // display a report for each item
     var ul = document.createElement('ul');
     resultContainer.append(ul);
-    for (i = 0; i < catalogArray.length; i++) {
+    for (var i = 0; i < productArray.length; i++) {
         var li = document.createElement('li');
-        li.textContent = catalogArray[i].name + ' had ' + catalogArray[i].counter + ' votes, and was seen ' + catalogArray[i].imageAppearance + ' times.';
+        li.textContent = productArray[i].name + ' had ' + productArray[i].counter + ' votes, and was seen ' + productArray[i].imageAppearance + ' times.';
         ul.append(li);
     }
 }
 
-// executable code
-function CheckAttempts() {  // give user attempts 
-    rounds--;
-    if (rounds >= 0) {
-        for (var i = 0; i < imagesContainer.length; i++) {
-            imagesContainer[i].addEventListener('click', trackClick)
-        }
-    } else {
-        for (var i = 0; i < imagesContainer.length; i++) {
-            imagesContainer[i].removeEventListener('click', trackClick)
-        }
-    }
-}
-
-
-function trackClick() {     // method will listen to event when image clicked
-    for (var i = 0; i < catalogArray.length; i++) {
-        var imgSrc = this.getAttribute('src');
-        if (imgSrc === catalogArray[i].path) {
-            catalogArray[i].isClicked();
-            console.log(rounds)
-            CheckAttempts()
-        }
+function CreateChart() {
+    var productsLabel = []
+    var productsClicked = []
+    var productsSeen = []
+    for (var i = 0; i < productArray.length; i++) {
+        productsLabel.push(productArray[i].name)
+        productsClicked.push(productArray[i].counter);
+        productsSeen.push(productArray[i].imageAppearance);
     }
 
-    randomImage();
-}
+    var chart = new Chart(barChart, {
+        type: 'bar',
+        data: {
+            labels: productsLabel,
+            datasets: [{
+                label: '# Clicked',
+                data: productsClicked,
+                backgroundColor: '#ff884b',
+                borderColor: 'rgb(255, 99, 132)',
+                borderWidth: 1
+            }, {
+                label: '# Seen',
+                data: productsSeen,
+                backgroundColor: '#ff577f',
+                borderColor: 'rgb(255, 99, 132)',
+                borderWidth: 1
+            }]
+        },
 
-
-randomImage(); // add first 3 images 
-for (var i = 0; i < imagesContainer.length; i++) {
-    imagesContainer[i].addEventListener('click', trackClick)
+        options: {
+            scales: {
+                yAxes: [{
+                    ticks: {
+                        beginAtZero: true
+                    }
+                }]
+            }
+        }
+    })
 }
-resultButton.addEventListener('click', generateResults) // generate result in list
+// >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> executable code
+
+container.addEventListener('click', trackUserPicks)  // listen to images clicked
+resultButton.addEventListener('click', displayResultList) // listen to show results button
+pickProducts()   // display images
