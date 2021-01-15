@@ -1,0 +1,15 @@
+body{
+    text-align: center;
+}
+  
+#images-container {
+    display:inline;
+}
+
+ img {
+    width: 300px;
+    height: 300px;
+    display: inline-block;
+    border: 9px solid;
+    margin: 5px;
+}
